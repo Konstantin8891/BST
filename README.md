@@ -12,6 +12,19 @@ Django 4.2
 
 Xlsxwriter 3.1.5
 
+## Содержимое .env файла
+
+EMAIL_HOST=
+
+EMAIL_PORT=
+
+EMAIL_HOST_USER=
+
+EMAIL_HOST_PASSWORD=
+
+EMAIL_USE_SSL=
+
+SECRET_KEY=
 
 ## Инструкции по запуску
 
