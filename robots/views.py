@@ -1,7 +1,9 @@
 import datetime
 import json
 
-from django.http import HttpResponse
+import xlsxwriter
+
+from django.http import HttpResponse, FileResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from .models import Robot
@@ -31,3 +33,36 @@ def add_robot(request):
         created=data['created']
     )
     return HttpResponse('Ok')
+
+
+def get_report(request):
+    if request.method != 'GET':
+        return HttpResponse('Method not allowed')
+    date_now = datetime.datetime.now()
+    first_day = date_now.date() - datetime.timedelta(days=date_now.weekday())
+    robots = Robot.objects.filter(created__gte=first_day).order_by('serial')
+    data_for_table = dict()
+    for robot in robots:
+        if data_for_table.get(robot.model):
+            if data_for_table.get(robot.version):
+                data_for_table[robot.model][robot.version] += 1
+            else:
+                data_for_table[robot.model][robot.version] = 1
+        else:
+            data_for_table[robot.model] = dict()
+            data_for_table[robot.model][robot.version] = 1
+    workbook = xlsxwriter.Workbook('report.xlsx')
+    for model, versions in data_for_table.items():
+        worksheet = workbook.add_worksheet()
+        worksheet.write('A1', 'Модель')
+        worksheet.write('B1', 'Версия')
+        worksheet.write('C1', 'Количество за неделю')
+        counter = 2
+        for version, amount in versions.items():
+            worksheet.write(f'A{counter}', model)
+            worksheet.write(f'B{counter}', version)
+            worksheet.write(f'C{counter}', amount)
+            counter += 1
+    workbook.close()
+
+    return FileResponse(open('report.xlsx', 'rb'))
