@@ -13,9 +13,7 @@ from .models import Robot
 def add_robot(request):
     if request.method != 'POST':
         return HttpResponse('Method not allowed')
-    # print(dir(request))
     data = json.loads(request.body)
-    print(data)
     if not data.get('model'):
         return HttpResponse('No model in input data')
     if not data.get('version'):
