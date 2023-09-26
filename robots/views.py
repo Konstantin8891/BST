@@ -41,28 +41,23 @@ def get_report(request):
     date_now = datetime.datetime.now()
     first_day = date_now.date() - datetime.timedelta(days=date_now.weekday())
     robots = Robot.objects.filter(created__gte=first_day).order_by('serial')
-    print(robots.all())
     data_for_table = dict()
     for robot in robots:
         if data_for_table.get(robot.model):
             if data_for_table.get(robot.version):
                 data_for_table[robot.model][robot.version] += 1
             else:
-                # data_for_table[robot.model] = dict()
                 data_for_table[robot.model][robot.version] = 1
         else:
             data_for_table[robot.model] = dict()
             data_for_table[robot.model][robot.version] = 1
-    print(data_for_table)
     workbook = xlsxwriter.Workbook('report.xlsx')
     for model, versions in data_for_table.items():
-        print(model)
         worksheet = workbook.add_worksheet()
         worksheet.write('A1', 'Модель')
         worksheet.write('B1', 'Версия')
         worksheet.write('C1', 'Количество за неделю')
         counter = 2
-        print(versions)
         for version, amount in versions.items():
             worksheet.write(f'A{counter}', model)
             worksheet.write(f'B{counter}', version)
